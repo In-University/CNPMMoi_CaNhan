@@ -4,11 +4,18 @@
     "description": "",
     "license": "ISC",
     "author": "",
-    "type": "commonjs",
+    "type": "module",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "nodemon --exec babel-node src/server.js"
+        "dev": "tsx --watch src/server.ts",
+        "start": "node dist/server.js",
+        "build": "tsc",
+        "type-check": "tsc --noEmit",
+        "lint": "eslint .",
+        "lint:fix": "eslint --fix .",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
         "body-parser": "^2.2.0",
@@ -22,6 +29,15 @@
         "@babel/core": "^7.28.3",
         "@babel/node": "^7.28.0",
         "@babel/preset-env": "^7.28.3",
-        "nodemon": "^3.1.10"
+        "@eslint/js": "^9.34.0",
+        "@tsconfig/node22": "^22.0.2",
+        "@types/express": "^5.0.3",
+        "@types/node": "^24.3.0",
+        "eslint": "^9.34.0",
+        "eslint-plugin-perfectionist": "^4.15.0",
+        "nodemon": "^3.1.10",
+        "tsx": "^4.20.5",
+        "typescript": "^5.9.2",
+        "typescript-eslint": "^8.41.0"
     }
 }
