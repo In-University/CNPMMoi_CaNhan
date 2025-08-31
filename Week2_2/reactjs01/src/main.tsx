@@ -7,6 +7,8 @@ import RegisterPage from './pages/register.tsx';
 import UserPage from './pages/user.tsx';
 import HomePage from './pages/home.tsx';
 import LoginPage from './pages/login.tsx';
+import ForgotPasswordPage from './pages/forgot-password.tsx';
+import ResetPasswordPage from './pages/reset-password.tsx';
 import { AuthWrapper } from './components/context/auth.context.jsx';
 
 const router = createBrowserRouter([
@@ -20,6 +22,8 @@ const router = createBrowserRouter([
   },
   { path: "register", element: <RegisterPage /> },
   { path: "login", element: <LoginPage /> },
+  { path: "forgot-password", element: <ForgotPasswordPage /> },
+  { path: "reset-password", element: <ResetPasswordPage /> },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

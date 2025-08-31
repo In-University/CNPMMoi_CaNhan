@@ -1,4 +1,3 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
 
 const dbState = [
@@ -9,7 +8,13 @@ const dbState = [
 ];
 
 const connection = async () => {
-    await mongoose.connect(process.env.MONGO_DB_URL);
+    const uri = process.env.MONGO_DB_URL;
+    if (!uri) {
+        throw new Error('MONGO_DB_URL is not defined in environment');
+    }
+    await mongoose.connect(uri, {
+        serverSelectionTimeoutMS: 5000,
+    });
     const state = Number(mongoose.connection.readyState);
     console.log(dbState.find(f => f.value === state).label, "to database"); // connected to db
 }

@@ -32,7 +32,7 @@ const Header = () => {
             onClick: () => navigate('/user')
         } : null,
         auth.isAuthenticated ? {
-            label: `Welcome ${auth.user.name}`,
+            label: `Welcome`,
             key: 'welcome',
             icon: <UserOutlined />,
             children: [

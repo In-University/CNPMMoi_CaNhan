@@ -14,6 +14,8 @@ export const AuthWrapper = (props) => {
     const [appLoading, setAppLoading] = useState(true);
     return (
         <AuthContext.Provider value={{ auth, setAuth, appLoading, setAppLoading }}>
+            {console.log("Context value from js:", { auth })}
+
             {props.children}
         </AuthContext.Provider>
     );
