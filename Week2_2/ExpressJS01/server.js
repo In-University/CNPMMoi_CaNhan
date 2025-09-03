@@ -5,7 +5,7 @@ const apiRoutes = require('./src/routes/api');
 const connection = require('./src/config/database');
 const { getHomepage } = require('./src/controllers/homeController');
 const cors = require('cors');
-const seedUsers = require('./src/seeders/seed');
+const { seedUsers, seedCategories, seedProducts } = require('./src/seeders/seed');
 const { testEmailConnection } = require('./src/services/emailService');
 
 const app = express(); //cấu hình app là express
@@ -29,6 +29,8 @@ app.use('/v1/api/', apiRoutes);
         await connection();
 
         await seedUsers();
+        await seedCategories();
+        await seedProducts();
 
         await testEmailConnection();
 

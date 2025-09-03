@@ -9,6 +9,7 @@ import HomePage from './pages/home.tsx';
 import LoginPage from './pages/login.tsx';
 import ForgotPasswordPage from './pages/forgot-password.tsx';
 import ResetPasswordPage from './pages/reset-password.tsx';
+import ProductsPage from './pages/products.tsx';
 import { AuthWrapper } from './components/context/auth.context.jsx';
 
 const router = createBrowserRouter([
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "user", element: <UserPage /> },
+      { path: "products", element: <ProductsPage /> },
     ],
   },
   { path: "register", element: <RegisterPage /> },
