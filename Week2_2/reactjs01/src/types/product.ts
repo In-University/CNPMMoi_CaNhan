@@ -9,6 +9,11 @@ export interface Product {
     };
     image: string;
     stock: number;
+    discount?: number;
+    views?: number;
+    rating?: number;
+    featured?: boolean;
+    inStock?: boolean;
     createdAt: string;
     updatedAt: string;
 }

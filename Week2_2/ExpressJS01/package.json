@@ -6,7 +6,10 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "nodemon ./server.js",
-        "start": "nodemon ./server.js"
+    "start": "nodemon ./server.js",
+    "es:ping": "node ./scripts/es-ping.js",
+    "es:put-mapping": "node ./scripts/es-put-mapping.js",
+    "es:index-all": "node ./scripts/es-index-all.js"
     },
     "keywords": [
         "nodejs",
@@ -16,6 +19,7 @@
     "author": "Nguyễn Hữu Trung",
     "license": "ISC",
     "dependencies": {
+    "@elastic/elasticsearch": "^8.15.0",
         "bcrypt": "^6.0.0",
         "cors": "^2.8.5",
         "dotenv": "^17.2.1",

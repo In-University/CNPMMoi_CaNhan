@@ -25,6 +25,30 @@ const productSchema = new mongoose.Schema({
     stock: {
         type: Number,
         default: 0
+    },
+    discount: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 100
+    },
+    views: {
+        type: Number,
+        default: 0
+    },
+    rating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5
+    },
+    featured: {
+        type: Boolean,
+        default: false
+    },
+    inStock: {
+        type: Boolean,
+        default: true
     }
 }, {
     timestamps: true
