@@ -1,0 +1,74 @@
+/* Embedded cart overrides: when the library component is used inside a page
+   we neutralize the full-screen fixed positioning so the app header remains visible */
+.shopping-cart-root.shopping-cart-embedded {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  background: transparent !important;
+  z-index: auto !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  display: block !important;
+}
+
+.shopping-cart-root.shopping-cart-embedded .shopping-cart-body {
+  padding: 0 !important;
+}
+
+.shopping-cart-root.shopping-cart-embedded .shopping-cart-footer {
+  position: static !important;
+}
+
+/* Small visual tweak so embedded cart blends with page */
+.shopping-cart-root.shopping-cart-embedded .shopping-cart-item {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Page-specific layout */
+.cart-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* give some breathing room from the header */
+  padding-top: 1rem;
+}
+
+.cart-title {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 0 1rem 0;
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a; /* dark slate */
+  text-align: left;
+}
+
+.cart-page-card {
+  width: calc(100% - 2rem);
+  max-width: 980px;
+  margin: 0 auto; /* center horizontally */
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+  border: 1px solid #e6eef6;
+}
+
+/* Make the embedded cart body have comfortable padding inside the card */
+.cart-page-card .shopping-cart-body {
+  padding: 1rem 0 !important;
+}
+
+/* Footer styling inside the card to align button to right */
+.cart-page-card .shopping-cart-footer__inner {
+  align-items: center;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .cart-title { font-size: 1.6rem; text-align: center; }
+  .cart-page-card { padding: 1rem; width: calc(100% - 1rem); }
+}

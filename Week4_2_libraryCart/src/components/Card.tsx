@@ -19,29 +19,24 @@ const Card: React.FC<CardProps> = ({
   clickable = false,
   onClick
 }) => {
-  const baseClasses = 'rounded-xl transition-all duration-300';
-  
-  const variantClasses = {
-    default: 'bg-white border border-gray-200 shadow-sm',
-    elevated: 'bg-white shadow-lg border border-gray-100',
-    outlined: 'bg-white border-2 border-gray-300',
-    glass: 'bg-white/80 backdrop-blur-sm border border-white/20 shadow-xl'
+  const baseClasses = 'card';
+
+  const variantClasses: Record<string, string> = {
+    default: 'card--default',
+    elevated: 'card--elevated',
+    outlined: 'card--outlined',
+    glass: 'card--glass'
   };
-  
-  const paddingClasses = {
-    none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8'
+
+  const paddingClasses: Record<string, string> = {
+    none: 'card--p-none',
+    sm: 'card--p-sm',
+    md: 'card--p-md',
+    lg: 'card--p-lg'
   };
-  
-  const hoverClasses = hover || clickable 
-    ? 'hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02]' 
-    : '';
-    
-  const clickableClasses = clickable 
-    ? 'cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2' 
-    : '';
+
+  const hoverClasses = hover || clickable ? 'card--hover' : '';
+  const clickableClasses = clickable ? 'card--clickable' : '';
 
   const combinedClasses = `${baseClasses} ${variantClasses[variant]} ${paddingClasses[padding]} ${hoverClasses} ${clickableClasses} ${className}`;
 

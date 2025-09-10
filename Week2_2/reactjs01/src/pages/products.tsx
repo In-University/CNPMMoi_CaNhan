@@ -9,16 +9,17 @@ import {
     Select, 
     Input, 
     Space, 
-    Slider, 
-    Switch, 
+    
     Button, 
-    Form, 
+    
     Rate, 
     Collapse,
     Tag 
 } from 'antd';
 import { FilterOutlined, ClearOutlined } from '@ant-design/icons';
 import axios from '../util/axios.customize';
+import LibraryCart from '../../../../Week4_2_libraryCart/src';
+import { useCart } from '../components/context/cart.context';
 import type { Product, ApiResponse, Category } from '../types/product';
 
 const { Option } = Select;
@@ -181,6 +182,12 @@ const ProductsPage: React.FC = () => {
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
+    };
+
+    const { addItem } = useCart();
+
+    const handleAddToCart = (product: Product) => {
+        addItem({ id: product._id, productId: product._id, name: product.name, price: product.price, quantity: 1, image: product.image });
     };
 
     return (
@@ -382,6 +389,11 @@ const ProductsPage: React.FC = () => {
                                         <p>Rating: <Rate disabled value={product.rating} /></p>
                                     )}
                                     {!product.inStock && <Tag color="red">Out of Stock</Tag>}
+                                    <div style={{ marginTop: 12 }}>
+                                        <LibraryCart.Button onClick={() => handleAddToCart(product)}>
+                                            Add to Cart
+                                        </LibraryCart.Button>
+                                    </div>
                                 </Card>
                             </Col>
                         ))}

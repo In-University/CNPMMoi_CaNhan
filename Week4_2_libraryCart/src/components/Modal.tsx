@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { X } from 'lucide-react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -46,53 +47,31 @@ const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl'
-  };
+  const sizeClass = `modal--${size}`;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        {/* Backdrop */}
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+    <div className="modal-root" role="dialog" aria-modal="true">
+      <div className="modal-outer">
+        <div
+          className="modal-backdrop"
           onClick={closeOnBackdropClick ? onClose : undefined}
           aria-hidden="true"
         />
-        
-        {/* Modal Content */}
-        <div 
-          className={`relative w-full ${sizeClasses[size]} transform transition-all ${className}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="relative bg-white rounded-2xl shadow-2xl">
-            {/* Header */}
+
+        <div className={`modal-content-wrapper ${sizeClass} ${className}`} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-card">
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                {title && (
-                  <h2 className="text-xl font-bold text-gray-900">
-                    {title}
-                  </h2>
-                )}
+              <div className="modal-header">
+                {title && <h2 className="modal-title">{title}</h2>}
                 {showCloseButton && (
-                  <button
-                    onClick={onClose}
-                    className="ml-auto bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                    aria-label="Close modal"
-                  >
-                    <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                  <button onClick={onClose} className="modal-close" aria-label="Close modal">
+                    <X className="modal-close__icon" />
                   </button>
                 )}
               </div>
             )}
-            
-            {/* Body */}
-            <div className="p-6">
+
+            <div className="modal-body">
               {children}
             </div>
           </div>

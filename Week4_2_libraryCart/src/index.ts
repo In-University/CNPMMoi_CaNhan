@@ -1,7 +1,18 @@
-export { default as Button } from './components/Button';
-export { default as Input } from './components/Input';
-export { default as Modal } from './components/Modal';
-export { default as Card } from './components/Card';
-export { default as ShoppingCart } from './components/ShoppingCart';
-export { default as CartIcon } from './components/CartIcon';
-export type { CartItem, Product, ShoppingCartProps, BaseProduct, BaseCartItem } from './types';
+// Re-export everything from components barrel to provide a single import path
+export * from './components';
+
+// Default namespaced export to avoid host-app name collisions.
+// Usage: import LibraryCart from 'library-cart'; then use <LibraryCart.Button /> etc.
+import * as Components from './components';
+import * as Types from './types';
+
+// Ensure consumers importing the library get the component CSS automatically.
+// This side-effect import includes `src/index.css` in bundlers like Vite/webpack.
+import './index.css';
+
+const LibraryCart = {
+	...Components,
+	// attach types for TS consumers (not used at runtime)
+} as unknown as typeof Components & { types: typeof Types };
+
+export default LibraryCart;

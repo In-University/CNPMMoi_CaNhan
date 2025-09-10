@@ -3,9 +3,13 @@ import { AuthContext } from '../context/auth.context';
 import { Menu } from 'antd';
 import { HomeOutlined, UserOutlined, LoginOutlined, LogoutOutlined, UserAddOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/cart.context';
+import LibraryCart from '../../../../../Week4_2_libraryCart/src';
 
 const Header = () => {
     const { auth, setAuth } = useContext(AuthContext);
+    const { items: cartItems } = useCart();
+    const itemsCount = cartItems.length;
     const navigate = useNavigate();
     const [current, setCurrent] = useState('home');
 
@@ -30,6 +34,12 @@ const Header = () => {
             key: 'products',
             icon: <ShoppingOutlined />,
             onClick: () => navigate('/products')
+        },
+        {
+            label: 'Cart',
+            key: 'cart',
+            icon: <LibraryCart.CartIcon itemCount={itemsCount} size="sm" />,
+            onClick: () => navigate('/cart')
         },
         auth.isAuthenticated ? {
             label: 'Users',
@@ -63,7 +73,7 @@ const Header = () => {
         } : null,
     ].filter(Boolean); // Filter out null values
 
-    const onClick = (e) => {
+    const onClick = (e: { key: string }) => {
         setCurrent(e.key);
     };
 
