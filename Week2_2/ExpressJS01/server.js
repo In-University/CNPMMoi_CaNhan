@@ -37,7 +37,7 @@ app.use('/v1/api/', apiRoutes);
         await testEmailConnection();
         const res = await pingES();
         console.log('✅ Elasticsearch connected:', res);
-        await indexAllProducts();
+        // await indexAllProducts();
 
         app.listen(port, () => {
             console.log(`Backend listening on port ${port}`);

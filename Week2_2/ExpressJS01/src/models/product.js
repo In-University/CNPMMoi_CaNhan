@@ -36,6 +36,21 @@ const productSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    // total number of times this product was purchased
+    purchasedCount: {
+        type: Number,
+        default: 0
+    },
+    // total number of comments on this product
+    commentCount: {
+        type: Number,
+        default: 0
+    },
+    // total number of users who favorited this product
+    favoritedCount: {
+        type: Number,
+        default: 0
+    },
     rating: {
         type: Number,
         default: 0,

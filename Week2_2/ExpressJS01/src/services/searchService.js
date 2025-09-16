@@ -184,7 +184,7 @@ async function searchProducts({
   
   const hits = result.hits?.hits || [];
   const total = typeof result.hits?.total === 'object' ? result.hits.total.value : (result.hits?.total || 0);
-  return { total, items: hits.map(h => ({ _score: h._score, ...h._source })) };
+  return { total, items: hits.map(h => ({ id: h._id, _score: h._score, ...h._source })) };
 }
 
 module.exports = { ensureIndex, indexProduct, bulkIndexProducts, removeProduct, searchProducts };

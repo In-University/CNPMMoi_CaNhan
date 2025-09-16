@@ -1,0 +1,54 @@
+# Product API tests
+# Fill these variables before running requests
+@BASE_URL = http://localhost:6969/v1/api
+@TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRlbGV0ZWhvbWUxMjM0NTZAZ21haWwuY29tIiwibmFtZSI6IjEyMyIsImlhdCI6MTc1Nzk5NjA1OSwiZXhwIjoxNzU3OTk5NjU5fQ.y9e0LmYofRnYZVLjiPNlAj6tNc1E6h81M-TQ1azsWOc
+@PRODUCT_ID = 68c8e61c6dc69ee69fb8e7d5
+
+### 1) Get product detail (this will increment `views` once per call)
+GET {{BASE_URL}}/products/{{PRODUCT_ID}}
+Accept: application/json
+
+### 2) Explicitly post a view (useful for SPA to separate view increment)
+POST {{BASE_URL}}/products/{{PRODUCT_ID}}/view
+Accept: application/json
+
+### 3) Toggle favorite (requires Authorization header: Bearer <token>)
+POST {{BASE_URL}}/products/{{PRODUCT_ID}}/favorite
+Authorization: Bearer {{TOKEN}}
+Accept: application/json
+
+### 4) Get similar products (uses product name + category)
+GET {{BASE_URL}}/products/{{PRODUCT_ID}}/similar
+Accept: application/json
+
+### 5) Post a comment (requires auth)
+POST {{BASE_URL}}/products/{{PRODUCT_ID}}/comment
+Authorization: Bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "content": "Bình luận thử"
+}
+
+### 6) Get comments (paginated)
+GET {{BASE_URL}}/products/{{PRODUCT_ID}}/comments?page=1&limit=20
+Accept: application/json
+
+### 7) Increment purchased count (call after an order completes)
+POST {{BASE_URL}}/products/{{PRODUCT_ID}}/purchased
+Content-Type: application/json
+
+{
+  "qty": 2
+}
+
+### Notes & expected shapes
+- GET /products/:id -> returns { success: true, data: product }
+- POST /products/:id/view -> returns updated product document
+- POST /products/:id/favorite (auth) -> returns { success: true, data: { favorited: true|false } }
+- GET /products/:id/similar -> returns { success: true, data: [ product, ... ] }
+- POST /products/:id/comment (auth) -> body { content } -> returns created comment
+- GET /products/:id/comments -> returns { success: true, data: [ comments ], pagination }
+- POST /products/:id/purchased -> body { qty } -> returns updated product document
+
+If you use the VSCode REST Client extension, set `@TOKEN` and `@PRODUCT_ID` at the top, then run each request block.

@@ -363,7 +363,9 @@ const ProductsPage: React.FC = () => {
                             <Col key={product._id} xs={24} sm={12} md={8} lg={6}>
                                 <Card
                                     hoverable
-                                    cover={<img alt={product.name} src={product.image || 'https://via.placeholder.com/300'} />}
+                                    style={{ height: 'auto', minHeight: '450px' }}
+                                    cover={<img alt={product.name} src={product.image || 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png'} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />}
+                                    fallback="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
                                 >
                                     <Card.Meta
                                         title={

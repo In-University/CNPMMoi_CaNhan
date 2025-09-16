@@ -1,6 +1,6 @@
 {
   "name": "library-cart",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "module",
   "description": "A React library for shopping cart UI components with add, edit, delete functionality",
   "main": "./dist/library-cart.umd.js",

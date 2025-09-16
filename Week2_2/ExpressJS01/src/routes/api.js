@@ -1,6 +1,17 @@
 const express = require('express');
 const { createUser, handleLogin, getUser, getAccount, forgotPassword, resetPassword } = require('../controllers/userController');
-const { getCategories, getProductsByCategory, getAllProducts } = require('../controllers/productController');
+const {
+    getCategories,
+    getProductsByCategory,
+    getAllProducts,
+    getProductDetail,
+    postView,
+    postToggleFavorite,
+    getSimilarProducts,
+    postComment,
+    getComments,
+    postPurchased
+} = require('../controllers/productController');
 const { searchProducts } = require('../services/searchService');
 const auth = require('../middleware/auth');
 const delay = require('../middleware/delay');
@@ -21,8 +32,7 @@ routerAPI.get("/account", auth, delay, getAccount);
 // Product routes
 routerAPI.get("/categories", getCategories);
 routerAPI.get("/products", getAllProducts);
-routerAPI.get("/products/category/:categoryId", getProductsByCategory);
-// Fuzzy search via Elasticsearch
+// Fuzzy search via Elasticsearch (place BEFORE /products/:id to avoid route conflicts)
 routerAPI.get('/products/search', async (req, res) => {
     try {
         const { 
@@ -77,5 +87,18 @@ routerAPI.get('/products/search', async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 });
+
+// Category filter
+routerAPI.get("/products/category/:categoryId", getProductsByCategory);
+// Product detail and interactions (specific sub-routes first)
+routerAPI.post('/products/:id/view', postView);
+routerAPI.post('/products/:id/favorite', auth, postToggleFavorite);
+routerAPI.get('/products/:id/similar', getSimilarProducts);
+routerAPI.post('/products/:id/comment', auth, postComment);
+routerAPI.get('/products/:id/comments', getComments);
+// Increment purchased count (can be called by order flow)
+routerAPI.post('/products/:id/purchased', postPurchased);
+// Generic product detail (last)
+routerAPI.get('/products/:id', getProductDetail);
 
 module.exports = routerAPI; //export default

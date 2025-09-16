@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const User = require('../models/user');
 const Category = require('../models/category');
 const Product = require('../models/product');
+const Comment = require('../models/comment');
 const bcrypt = require('bcrypt');
 
 const seedUsers = async () => {
@@ -191,6 +192,36 @@ const seedProducts = async () => {
     ];
     await Product.insertMany(products);
     console.log('Products seeded successfully!');
+    // Backfill new counters for products if missing (do NOT overwrite existing non-null values)
+    await Product.updateMany({ $or: [{ purchasedCount: { $exists: false } }, { purchasedCount: null }] }, { $set: { purchasedCount: 0 } });
+    await Product.updateMany({ $or: [{ commentCount: { $exists: false } }, { commentCount: null }] }, { $set: { commentCount: 0 } });
+    await Product.updateMany({ $or: [{ favoritedCount: { $exists: false } }, { favoritedCount: null }] }, { $set: { favoritedCount: 0 } });
+
+    // Create a few demo comments if no comments exist yet
+    const existingComments = await Comment.countDocuments();
+    if (existingComments === 0) {
+      try {
+        const users = await User.find();
+        const prods = await Product.find().limit(5);
+        if (users.length > 0 && prods.length > 0) {
+          const demoComments = [
+            { productId: prods[0]._id, userId: users[0]._id, content: 'Sản phẩm tốt, chất lượng ổn.' },
+            { productId: prods[1 % prods.length]._id, userId: users[1 % users.length]._id, content: 'Giao hàng nhanh, ưng ý!' },
+            { productId: prods[2 % prods.length]._id, userId: users[0]._id, content: 'Giá hơi cao nhưng đáng giá.' }
+          ];
+          await Comment.insertMany(demoComments);
+          // update commentCount for affected products
+          const affected = [...new Set(demoComments.map(c => c.productId.toString()))];
+          for (const pid of affected) {
+            const count = await Comment.countDocuments({ productId: pid });
+            await Product.findByIdAndUpdate(pid, { $set: { commentCount: count } });
+          }
+          console.log('Demo comments created and commentCount backfilled.');
+        }
+      } catch (e) {
+        console.error('Error creating demo comments:', e);
+      }
+    }
   } catch (error) {
     console.error('Error seeding products:', error);
   }
