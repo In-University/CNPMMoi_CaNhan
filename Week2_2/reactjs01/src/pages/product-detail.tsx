@@ -143,7 +143,7 @@ const ProductDetailPage: React.FC = () => {
                                         <ProductItem 
                                             product={product}
                                             onFavoriteChange={handleFavoriteChange}
-                                            showDetailButton={false}
+                                            showDetailButton={true}
                                         />
                                     </Col>
                                 ))}

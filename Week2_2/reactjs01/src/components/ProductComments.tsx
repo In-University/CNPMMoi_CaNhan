@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { AuthContext } from './context/auth.context';
+import { AuthContext } from './context/auth.context.jsx';
 import type { ProductComment, CommentPagination } from '../types/product';
 import { getProductCommentsApi, postProductCommentApi } from '../util/api';
 import '../styles/product-components.css';
@@ -18,7 +18,7 @@ const ProductComments: React.FC<ProductCommentsProps> = ({ productId, onCommentA
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
     
-    const { user } = useContext(AuthContext);
+    const { auth } = useContext(AuthContext);
     const itemsPerPage = 20;
 
     const fetchComments = useCallback(async (page: number) => {
@@ -48,8 +48,8 @@ const ProductComments: React.FC<ProductCommentsProps> = ({ productId, onCommentA
     const handleSubmitComment = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        if (!user) {
-            alert('Vui lòng đăng nhập để bình luận');
+        if (!auth.isAuthenticated) {
+            alert('Vui lòng đăng nhập để bình luận.');
             return;
         }
 
@@ -112,12 +112,12 @@ const ProductComments: React.FC<ProductCommentsProps> = ({ productId, onCommentA
 
             {/* Comment Form */}
             <div className="comment-form-section">
-                {user ? (
+                {auth.isAuthenticated ? (
                     <form onSubmit={handleSubmitComment} className="comment-form">
                         <div className="comment-input-section">
                             <div className="user-avatar">
                                 <span className="avatar-placeholder">
-                                    {user.name?.charAt(0).toUpperCase() || 'U'}
+                                    {auth?.user?.name ? auth.user.name.charAt(0).toUpperCase() : 'U'}
                                 </span>
                             </div>
                             <div className="comment-input-container">
@@ -174,28 +174,31 @@ const ProductComments: React.FC<ProductCommentsProps> = ({ productId, onCommentA
                     </div>
                 ) : (
                     <>
-                        {comments.map((comment) => (
-                            <div key={comment._id} className="comment-item">
-                                <div className="comment-avatar">
-                                    <span className="avatar-placeholder">
-                                        {comment.user.name.charAt(0).toUpperCase()}
-                                    </span>
-                                </div>
-                                
-                                <div className="comment-content">
-                                    <div className="comment-header">
-                                        <span className="commenter-name">{comment.user.name}</span>
-                                        <span className="comment-date">
-                                            {formatDate(comment.createdAt)}
-                                        </span>
+                        {comments.map((comment) => {
+                            // API may return user info under `user` or `userId` (object) depending on backend implementation.
+                            const commenter: { name?: string } | null = (comment as any).user ?? (comment as any).userId ?? null;
+                            const commenterName = commenter?.name ?? 'Người dùng';
+                            const initial = commenterName ? commenterName.charAt(0).toUpperCase() : 'U';
+
+                            return (
+                                <div key={comment._id} className="comment-item">
+                                    <div className="comment-avatar">
+                                        <span className="avatar-placeholder">{initial}</span>
                                     </div>
-                                    
-                                    <div className="comment-text">
-                                        {comment.content}
+
+                                    <div className="comment-content">
+                                        <div className="comment-header">
+                                            <span className="commenter-name">{commenterName}</span>
+                                            <span className="comment-date">
+                                                {formatDate(comment.createdAt)}
+                                            </span>
+                                        </div>
+
+                                        <div className="comment-text">{comment.content}</div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </>
                 )}
             </div>

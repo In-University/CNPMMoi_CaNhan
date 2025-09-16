@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useContext } from 'react';
-import { AuthContext } from './context/auth.context';
+import { AuthContext } from './context/auth.context.jsx';
+import { useCart } from './context/cart.context';
 import type { Product } from '../types/product';
 import { getProductDetailApi, postProductViewApi, toggleFavoriteApi } from '../util/api';
 import '../styles/product-components.css';
@@ -17,7 +18,21 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onProductLoad 
     const [favoriteLoading, setFavoriteLoading] = useState<boolean>(false);
     const [isFavorited, setIsFavorited] = useState<boolean>(false);
     
-    const { user } = useContext(AuthContext);
+    const { auth } = useContext(AuthContext);
+    const { addItem } = useCart();
+
+    const handleAddToCart = () => {
+        if (!product) return;
+        
+        addItem({ 
+            id: product._id, 
+            productId: product._id, 
+            name: product.name, 
+            price: product.price, 
+            quantity: 1, 
+            image: product.image 
+        });
+    };
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -69,7 +84,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onProductLoad 
     };
 
     const handleToggleFavorite = async () => {
-        if (!user) {
+        if (!auth.isAuthenticated) {
             alert('Vui lòng đăng nhập để thêm vào yêu thích');
             return;
         }
@@ -222,6 +237,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onProductLoad 
                         <button 
                             className="add-to-cart-button"
                             disabled={!product.inStock}
+                            onClick={handleAddToCart}
                         >
                             {product.inStock ? 'Thêm vào giỏ hàng' : 'Hết hàng'}
                         </button>

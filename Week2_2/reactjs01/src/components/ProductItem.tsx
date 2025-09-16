@@ -1,9 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { Card, Button, Tag, Rate } from 'antd';
-import { EyeOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons';
+import { EyeOutlined, HeartOutlined, HeartFilled, ShoppingCartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from './context/auth.context';
-import LibraryCart from '../../../../Week4_2_libraryCart/src';
+import { AuthContext } from './context/auth.context.jsx';
 import { useCart } from './context/cart.context';
 import { ProductStatsCompact } from './ProductStats';
 import { toggleFavoriteApi } from '../util/api';
@@ -21,11 +20,20 @@ const ProductItem: React.FC<ProductItemProps> = ({
     showDetailButton = true 
 }) => {
     const navigate = useNavigate();
-    const { user } = useContext(AuthContext);
+    const { auth } = useContext(AuthContext);
     const { addItem } = useCart();
     
     const [favoriteLoading, setFavoriteLoading] = useState(false);
-    const [isFavorited, setIsFavorited] = useState(false);
+    // Initialize from product.favoritedCount (presence indicates favorited by current user is not directly available)
+    // If backend later provides an explicit `isFavorited` field, prefer that. For now derive false and allow parent to control count.
+    const [isFavorited, setIsFavorited] = useState<boolean>(() => !!(product as any).isFavorited);
+
+    // Keep local favorite state in sync if parent/product changes (e.g., after toggling in detail view)
+    React.useEffect(() => {
+        if (typeof (product as any).isFavorited !== 'undefined') {
+            setIsFavorited(!!(product as any).isFavorited);
+        }
+    }, [product]);
 
     const handleViewProductDetail = () => {
         navigate(`/products/${product._id}`);
@@ -45,7 +53,7 @@ const ProductItem: React.FC<ProductItemProps> = ({
     const handleToggleFavorite = async (e: React.MouseEvent) => {
         e.stopPropagation();
         
-        if (!user) {
+        if (!auth.isAuthenticated) {
             alert('Vui lòng đăng nhập để thêm vào yêu thích');
             return;
         }
@@ -118,21 +126,23 @@ const ProductItem: React.FC<ProductItemProps> = ({
                 >
                     Xem chi tiết
                 </Button>,
-                <LibraryCart.Button 
+                <Button 
                     key="cart"
+                    type="primary"
                     onClick={handleAddToCart}
                     disabled={!product.inStock}
                 >
                     {product.inStock ? 'Thêm giỏ hàng' : 'Hết hàng'}
-                </LibraryCart.Button>
+                </Button>
             ] : [
-                <LibraryCart.Button 
+                <Button 
                     key="cart"
+                    type="primary"
                     onClick={handleAddToCart}
                     disabled={!product.inStock}
                 >
                     {product.inStock ? 'Thêm giỏ hàng' : 'Hết hàng'}
-                </LibraryCart.Button>
+                </Button>
             ]}
         >
             <Card.Meta
