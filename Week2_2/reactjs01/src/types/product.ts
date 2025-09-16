@@ -6,14 +6,22 @@ export interface Product {
     category: {
         _id: string;
         name: string;
+        description?: string;
+        __v?: number;
+        createdAt?: string;
+        updatedAt?: string;
     };
     image: string;
     stock: number;
     discount?: number;
     views?: number;
+    purchasedCount?: number;
+    commentCount?: number;
+    favoritedCount?: number;
     rating?: number;
     featured?: boolean;
     inStock?: boolean;
+    __v?: number;
     createdAt: string;
     updatedAt: string;
 }
@@ -38,4 +46,61 @@ export interface ApiResponse<T> {
     data: T;
     pagination?: PaginationInfo;
     message?: string;
+}
+
+// Product Comment interfaces
+export interface ProductComment {
+    _id: string;
+    content: string;
+    user: {
+        _id: string;
+        name: string;
+        email: string;
+    };
+    product: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface CommentPagination {
+    currentPage: number;
+    totalItems: number;
+}
+
+export interface CommentsResponse {
+    success: boolean;
+    data: ProductComment[];
+    pagination: CommentPagination;
+}
+
+// Similar Product interface (from API response)
+export interface SimilarProduct {
+    id: string;
+    _score: number | null;
+    name: string;
+    description: string;
+    price: number;
+    categoryId: string;
+    categoryName: string;
+    image: string;
+    stock: number;
+    discount: number;
+    views: number;
+    rating: number;
+    featured: boolean;
+    inStock: boolean;
+    createdAt: string;
+}
+
+// Favorite response
+export interface FavoriteResponse {
+    success: boolean;
+    data: {
+        favorited: boolean;
+    };
+}
+
+// Purchase response
+export interface PurchaseRequest {
+    qty: number;
 }

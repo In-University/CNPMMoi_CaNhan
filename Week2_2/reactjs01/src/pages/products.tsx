@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { 
-    Card, 
     Row, 
     Col, 
     Pagination, 
@@ -9,17 +8,13 @@ import {
     Select, 
     Input, 
     Space, 
-    
     Button, 
-    
     Rate, 
-    Collapse,
-    Tag 
+    Collapse
 } from 'antd';
 import { FilterOutlined, ClearOutlined } from '@ant-design/icons';
 import axios from '../util/axios.customize';
-import LibraryCart from '../../../../Week4_2_libraryCart/src';
-import { useCart } from '../components/context/cart.context';
+import ProductItem from '../components/ProductItem';
 import type { Product, ApiResponse, Category } from '../types/product';
 
 const { Option } = Select;
@@ -115,6 +110,9 @@ const ProductsPage: React.FC = () => {
                         stock: Number(r['stock'] ?? 0),
                         discount: Number(r['discount'] ?? 0),
                         views: Number(r['views'] ?? 0),
+                        purchasedCount: Number(r['purchasedCount'] ?? 0),
+                        commentCount: Number(r['commentCount'] ?? 0),
+                        favoritedCount: Number(r['favoritedCount'] ?? 0),
                         rating: Number(r['rating'] ?? 0),
                         featured: Boolean(r['featured'] ?? false),
                         inStock: Boolean(r['inStock'] ?? true),
@@ -184,10 +182,18 @@ const ProductsPage: React.FC = () => {
         setCurrentPage(page);
     };
 
-    const { addItem } = useCart();
-
-    const handleAddToCart = (product: Product) => {
-        addItem({ id: product._id, productId: product._id, name: product.name, price: product.price, quantity: 1, image: product.image });
+    const handleFavoriteChange = (productId: string, favorited: boolean) => {
+        // Update local product state
+        setProducts(prev => prev.map(product => 
+            product._id === productId 
+                ? { 
+                    ...product, 
+                    favoritedCount: favorited 
+                        ? (product.favoritedCount || 0) + 1
+                        : Math.max((product.favoritedCount || 0) - 1, 0)
+                  }
+                : product
+        ));
     };
 
     return (
@@ -361,42 +367,10 @@ const ProductsPage: React.FC = () => {
                     <Row gutter={[16, 16]}>
                         {products.map(product => (
                             <Col key={product._id} xs={24} sm={12} md={8} lg={6}>
-                                <Card
-                                    hoverable
-                                    style={{ height: 'auto', minHeight: '450px' }}
-                                    cover={<img alt={product.name} src={product.image || 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png'} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />}
-                                    fallback="https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"
-                                >
-                                    <Card.Meta
-                                        title={
-                                            <div>
-                                                {product.name}
-                                                {product.featured && <Tag color="gold" style={{ marginLeft: 8 }}>Featured</Tag>}
-                                            </div>
-                                        }
-                                        description={
-                                            <div>
-                                                <div>Price: ${product.price}</div>
-                                                {product.discount && product.discount > 0 && (
-                                                    <Tag color="red">-{product.discount}%</Tag>
-                                                )}
-                                            </div>
-                                        }
-                                    />
-                                    <p>{product.description}</p>
-                                    <p>Category: {product.category?.name}</p>
-                                    <p>Stock: {product.stock}</p>
-                                    {product.views && <p>Views: {product.views}</p>}
-                                    {product.rating && (
-                                        <p>Rating: <Rate disabled value={product.rating} /></p>
-                                    )}
-                                    {!product.inStock && <Tag color="red">Out of Stock</Tag>}
-                                    <div style={{ marginTop: 12 }}>
-                                        <LibraryCart.Button onClick={() => handleAddToCart(product)}>
-                                            Add to Cart
-                                        </LibraryCart.Button>
-                                    </div>
-                                </Card>
+                                <ProductItem 
+                                    product={product}
+                                    onFavoriteChange={handleFavoriteChange}
+                                />
                             </Col>
                         ))}
                     </Row>

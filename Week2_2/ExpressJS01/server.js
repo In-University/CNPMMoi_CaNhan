@@ -30,9 +30,9 @@ app.use('/v1/api/', apiRoutes);
     try {
         await connection();
 
-        await seedUsers();
-        await seedCategories();
-        await seedProducts();
+        // await seedUsers();
+        // await seedCategories();
+        // await seedProducts();
 
         await testEmailConnection();
         const res = await pingES();

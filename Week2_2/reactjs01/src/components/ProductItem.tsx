@@ -1,0 +1,192 @@
+import React, { useState, useContext } from 'react';
+import { Card, Button, Tag, Rate } from 'antd';
+import { EyeOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from './context/auth.context';
+import LibraryCart from '../../../../Week4_2_libraryCart/src';
+import { useCart } from './context/cart.context';
+import { ProductStatsCompact } from './ProductStats';
+import { toggleFavoriteApi } from '../util/api';
+import type { Product } from '../types/product';
+
+interface ProductItemProps {
+    product: Product;
+    onFavoriteChange?: (productId: string, favorited: boolean) => void;
+    showDetailButton?: boolean;
+}
+
+const ProductItem: React.FC<ProductItemProps> = ({ 
+    product, 
+    onFavoriteChange,
+    showDetailButton = true 
+}) => {
+    const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
+    const { addItem } = useCart();
+    
+    const [favoriteLoading, setFavoriteLoading] = useState(false);
+    const [isFavorited, setIsFavorited] = useState(false);
+
+    const handleViewProductDetail = () => {
+        navigate(`/products/${product._id}`);
+    };
+
+    const handleAddToCart = () => {
+        addItem({ 
+            id: product._id, 
+            productId: product._id, 
+            name: product.name, 
+            price: product.price, 
+            quantity: 1, 
+            image: product.image 
+        });
+    };
+
+    const handleToggleFavorite = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        
+        if (!user) {
+            alert('Vui lòng đăng nhập để thêm vào yêu thích');
+            return;
+        }
+
+        try {
+            setFavoriteLoading(true);
+            const response = await toggleFavoriteApi(product._id);
+            
+            if (response.success) {
+                const newFavoriteState = response.data.favorited;
+                setIsFavorited(newFavoriteState);
+                onFavoriteChange?.(product._id, newFavoriteState);
+            }
+        } catch (err: unknown) {
+            console.error('Error toggling favorite:', err);
+            const errorMessage = err && typeof err === 'object' && 'response' in err && 
+                err.response && typeof err.response === 'object' && 'data' in err.response &&
+                err.response.data && typeof err.response.data === 'object' && 'message' in err.response.data
+                ? (err.response.data as { message: string }).message 
+                : 'Có lỗi xảy ra';
+            alert(errorMessage);
+        } finally {
+            setFavoriteLoading(false);
+        }
+    };
+
+    return (
+        <Card
+            hoverable
+            style={{ 
+                height: 'auto', 
+                minHeight: '450px',
+                position: 'relative'
+            }}
+            cover={
+                <div style={{ position: 'relative' }}>
+                    <img 
+                        alt={product.name} 
+                        src={product.image || 'https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png'} 
+                        style={{ width: '100%', height: '200px', objectFit: 'cover' }} 
+                    />
+                    {/* Favorite button at top right */}
+                    <Button
+                        type="text"
+                        icon={isFavorited ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />}
+                        loading={favoriteLoading}
+                        onClick={handleToggleFavorite}
+                        style={{
+                            position: 'absolute',
+                            top: '8px',
+                            right: '8px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    />
+                </div>
+            }
+            actions={showDetailButton ? [
+                <Button 
+                    key="view" 
+                    type="link" 
+                    icon={<EyeOutlined />}
+                    onClick={handleViewProductDetail}
+                >
+                    Xem chi tiết
+                </Button>,
+                <LibraryCart.Button 
+                    key="cart"
+                    onClick={handleAddToCart}
+                    disabled={!product.inStock}
+                >
+                    {product.inStock ? 'Thêm giỏ hàng' : 'Hết hàng'}
+                </LibraryCart.Button>
+            ] : [
+                <LibraryCart.Button 
+                    key="cart"
+                    onClick={handleAddToCart}
+                    disabled={!product.inStock}
+                >
+                    {product.inStock ? 'Thêm giỏ hàng' : 'Hết hàng'}
+                </LibraryCart.Button>
+            ]}
+        >
+            <Card.Meta
+                title={
+                    <div>
+                        {product.name}
+                        {product.featured && <Tag color="gold" style={{ marginLeft: 8 }}>Nổi bật</Tag>}
+                    </div>
+                }
+                description={
+                    <div>
+                        <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#1890ff' }}>
+                            ${product.price}
+                        </div>
+                        {product.discount && product.discount > 0 && (
+                            <Tag color="red">-{product.discount}%</Tag>
+                        )}
+                    </div>
+                }
+            />
+            
+            <div style={{ margin: '12px 0' }}>
+                <p style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                    {product.description.length > 80 
+                        ? `${product.description.substring(0, 80)}...` 
+                        : product.description
+                    }
+                </p>
+                
+                <p style={{ marginBottom: '4px' }}>
+                    <strong>Danh mục:</strong> {product.category?.name}
+                </p>
+                
+                <div style={{ marginBottom: '8px' }}>
+                    <span style={{ marginRight: '16px' }}>
+                        <strong>Kho:</strong> {product.stock}
+                    </span>
+                    {!product.inStock && <Tag color="red">Hết hàng</Tag>}
+                </div>
+
+                {/* Product Stats */}
+                <ProductStatsCompact product={product} />
+                
+                {product.rating && (
+                    <div style={{ marginTop: '8px' }}>
+                        <Rate disabled value={product.rating} style={{ fontSize: '14px' }} />
+                        <span style={{ marginLeft: '8px', fontSize: '12px' }}>
+                            ({product.rating.toFixed(1)})
+                        </span>
+                    </div>
+                )}
+            </div>
+        </Card>
+    );
+};
+
+export default ProductItem;
