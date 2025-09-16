@@ -22,6 +22,7 @@ const getCategories = async (req, res) => {
 
 const getProductsByCategory = async (req, res) => {
     try {
+        console.log('getProductsByCategory: req.user =', req.user ? { email: req.user.email } : null);
         const { categoryId } = req.params;
         const { page = 1, limit = 12 } = req.query;
 
@@ -37,9 +38,25 @@ const getProductsByCategory = async (req, res) => {
 
         const total = await Product.countDocuments({ category: categoryId });
 
+        // If user is authenticated, determine which products are favorited by that user
+        let favoritesSet = new Set();
+        if (req.user && req.user.email) {
+            const User = require('../models/user');
+            const user = await User.findOne({ email: req.user.email }).select('favorites');
+            if (user && Array.isArray(user.favorites)) {
+                favoritesSet = new Set(user.favorites.map(f => f.toString()));
+            }
+        }
+
+        const payload = products.map(p => {
+            const obj = p.toObject ? p.toObject() : p;
+            obj.isFavorited = favoritesSet.has((obj._id || obj.id).toString());
+            return obj;
+        });
+
         return res.status(200).json({
             success: true,
-            data: products,
+            data: payload,
             pagination: {
                 currentPage: pageNum,
                 totalPages: Math.ceil(total / limitNum),
@@ -57,6 +74,7 @@ const getProductsByCategory = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
+        console.log('getAllProducts: req.user =', req.user ? { email: req.user.email } : null);
         const { page = 1, limit = 12 } = req.query;
 
         const pageNum = parseInt(page);
@@ -71,9 +89,25 @@ const getAllProducts = async (req, res) => {
 
         const total = await Product.countDocuments({});
 
+        // If user is authenticated, determine which products are favorited by that user
+        let favoritesSet = new Set();
+        if (req.user && req.user.email) {
+            const User = require('../models/user');
+            const user = await User.findOne({ email: req.user.email }).select('favorites');
+            if (user && Array.isArray(user.favorites)) {
+                favoritesSet = new Set(user.favorites.map(f => f.toString()));
+            }
+        }
+
+        const payload = products.map(p => {
+            const obj = p.toObject ? p.toObject() : p;
+            obj.isFavorited = favoritesSet.has((obj._id || obj.id).toString());
+            return obj;
+        });
+
         return res.status(200).json({
             success: true,
-            data: products,
+            data: payload,
             pagination: {
                 currentPage: pageNum,
                 totalPages: Math.ceil(total / limitNum),
@@ -103,7 +137,15 @@ const getProductDetail = async (req, res) => {
         if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
         // increment view counter (using existing 'views' field)
         await incrementView(id);
-        return res.status(200).json({ success: true, data: product });
+        // determine if the requesting user has this product favorited
+        let isFavorited = false;
+        if (req.user && req.user.email) {
+            const User = require('../models/user');
+            const user = await User.findOne({ email: req.user.email }).select('favorites');
+            isFavorited = user?.favorites?.some(f => f.toString() === id.toString()) || false;
+        }
+        const payload = { ...product.toObject(), isFavorited };
+        return res.status(200).json({ success: true, data: payload });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
@@ -131,7 +173,8 @@ const postToggleFavorite = async (req, res) => {
         if (!user) return res.status(401).json({ success: false, message: 'User not found' });
         const { id } = req.params;
         const result = await toggleFavorite(user._id, id);
-        return res.status(200).json({ success: true, data: result });
+        // return a stable shape for client: isFavorited + favoritedCount
+        return res.status(200).json({ success: true, data: { isFavorited: result.isFavorited, favoritedCount: result.favoritedCount } });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }

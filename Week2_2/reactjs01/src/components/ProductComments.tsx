@@ -175,9 +175,21 @@ const ProductComments: React.FC<ProductCommentsProps> = ({ productId, onCommentA
                 ) : (
                     <>
                         {comments.map((comment) => {
-                            // API may return user info under `user` or `userId` (object) depending on backend implementation.
-                            const commenter: { name?: string } | null = (comment as any).user ?? (comment as any).userId ?? null;
-                            const commenterName = commenter?.name ?? 'Người dùng';
+                            // API may return user info under `user` or `userId` (object) or a string id.
+                            type RawUserShape = { _id?: string; name?: string; email?: string } | string | null | undefined;
+                            const c = comment as unknown as { user?: RawUserShape; userId?: RawUserShape };
+                            const rawUser = c.user ?? c.userId ?? null;
+                            let commenterName = 'Người dùng';
+
+                            if (rawUser) {
+                                if (typeof rawUser === 'string') {
+                                    // not populated, fallback
+                                    commenterName = 'Người dùng';
+                                } else if (typeof rawUser === 'object') {
+                                    commenterName = (rawUser.name && typeof rawUser.name === 'string') ? rawUser.name : 'Người dùng';
+                                }
+                            }
+
                             const initial = commenterName ? commenterName.charAt(0).toUpperCase() : 'U';
 
                             return (

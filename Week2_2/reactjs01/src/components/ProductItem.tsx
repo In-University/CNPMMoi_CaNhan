@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { Card, Button, Tag, Rate } from 'antd';
-import { EyeOutlined, HeartOutlined, HeartFilled, ShoppingCartOutlined } from '@ant-design/icons';
+import { EyeOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/auth.context.jsx';
 import { useCart } from './context/cart.context';
@@ -26,12 +26,14 @@ const ProductItem: React.FC<ProductItemProps> = ({
     const [favoriteLoading, setFavoriteLoading] = useState(false);
     // Initialize from product.favoritedCount (presence indicates favorited by current user is not directly available)
     // If backend later provides an explicit `isFavorited` field, prefer that. For now derive false and allow parent to control count.
-    const [isFavorited, setIsFavorited] = useState<boolean>(() => !!(product as any).isFavorited);
+    // product may include `isFavorited` from backend
+    const [isFavorited, setIsFavorited] = useState<boolean>(() => !!(product as unknown as { isFavorited?: boolean }).isFavorited);
 
     // Keep local favorite state in sync if parent/product changes (e.g., after toggling in detail view)
     React.useEffect(() => {
-        if (typeof (product as any).isFavorited !== 'undefined') {
-            setIsFavorited(!!(product as any).isFavorited);
+        const p = product as unknown as { isFavorited?: boolean };
+        if (typeof p.isFavorited !== 'undefined') {
+            setIsFavorited(!!p.isFavorited);
         }
     }, [product]);
 
@@ -63,8 +65,9 @@ const ProductItem: React.FC<ProductItemProps> = ({
             const response = await toggleFavoriteApi(product._id);
             
             if (response.success) {
-                const newFavoriteState = response.data.favorited;
+                const newFavoriteState = typeof response.data.isFavorited !== 'undefined' ? !!response.data.isFavorited : !!(response.data.favorited);
                 setIsFavorited(newFavoriteState);
+                // optionally update parent with new state
                 onFavoriteChange?.(product._id, newFavoriteState);
             }
         } catch (err: unknown) {

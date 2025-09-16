@@ -22,20 +22,22 @@ async function toggleFavorite(userId, productId) {
   if (exists) {
     // remove
     await User.findByIdAndUpdate(userId, { $pull: { favorites: productId } });
-    await Product.findByIdAndUpdate(productId, { $inc: { favoritedCount: -1 } });
-    return { favorited: false };
+    const updatedProduct = await Product.findByIdAndUpdate(productId, { $inc: { favoritedCount: -1 } }, { new: true });
+    return { isFavorited: false, favoritedCount: updatedProduct?.favoritedCount || 0 };
   } else {
     // add
     await User.findByIdAndUpdate(userId, { $addToSet: { favorites: productId } });
-    await Product.findByIdAndUpdate(productId, { $inc: { favoritedCount: 1 } });
-    return { favorited: true };
+    const updatedProduct = await Product.findByIdAndUpdate(productId, { $inc: { favoritedCount: 1 } }, { new: true });
+    return { isFavorited: true, favoritedCount: updatedProduct?.favoritedCount || 0 };
   }
 }
 
 async function addComment(userId, productId, content) {
   const comment = await Comment.create({ userId, productId, content });
   await incrementCommentCount(productId, 1);
-  return comment;
+  // populate userId for immediate client use
+  const populated = await Comment.findById(comment._id).populate('userId', 'name email');
+  return populated;
 }
 
 module.exports = {

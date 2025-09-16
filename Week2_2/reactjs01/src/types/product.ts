@@ -18,6 +18,7 @@ export interface Product {
     purchasedCount?: number;
     commentCount?: number;
     favoritedCount?: number;
+    isFavorited?: boolean;
     rating?: number;
     featured?: boolean;
     inStock?: boolean;
@@ -52,11 +53,17 @@ export interface ApiResponse<T> {
 export interface ProductComment {
     _id: string;
     content: string;
-    user: {
-        _id: string;
-        name: string;
-        email: string;
-    };
+    // backend may return user info under `user` or `userId` and it may be populated or not
+    user?: {
+        _id?: string;
+        name?: string;
+        email?: string;
+    } | null;
+    userId?: {
+        _id?: string;
+        name?: string;
+        email?: string;
+    } | string | null;
     product: string;
     createdAt: string;
     updatedAt: string;
@@ -96,7 +103,11 @@ export interface SimilarProduct {
 export interface FavoriteResponse {
     success: boolean;
     data: {
-        favorited: boolean;
+        // new stable shape returned by backend
+        isFavorited?: boolean;
+        favoritedCount?: number;
+        // legacy field
+        favorited?: boolean;
     };
 }
 

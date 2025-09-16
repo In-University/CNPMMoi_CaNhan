@@ -118,7 +118,9 @@ const ProductsPage: React.FC = () => {
                         inStock: Boolean(r['inStock'] ?? true),
                         createdAt: String(r['createdAt'] ?? ''),
                         updatedAt: String((r['updatedAt'] as string | undefined) ?? ''),
-                        category
+                        category,
+                        // backend may add isFavorited per product for authenticated users
+                        isFavorited: !!r['isFavorited']
                     };
                 });
                 setProducts(list);
@@ -190,7 +192,8 @@ const ProductsPage: React.FC = () => {
                     ...product, 
                     favoritedCount: favorited 
                         ? (product.favoritedCount || 0) + 1
-                        : Math.max((product.favoritedCount || 0) - 1, 0)
+                        : Math.max((product.favoritedCount || 0) - 1, 0),
+                    isFavorited: !!favorited
                   }
                 : product
         ));

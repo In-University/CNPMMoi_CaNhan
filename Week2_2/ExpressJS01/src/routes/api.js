@@ -15,6 +15,7 @@ const {
 const { searchProducts } = require('../services/searchService');
 const auth = require('../middleware/auth');
 const delay = require('../middleware/delay');
+const optionalAuth = require('../middleware/optionalAuth');
 
 const routerAPI = express.Router();
 routerAPI.get("/", (req, res) => {
@@ -31,9 +32,9 @@ routerAPI.get("/account", auth, delay, getAccount);
 
 // Product routes
 routerAPI.get("/categories", getCategories);
-routerAPI.get("/products", getAllProducts);
+routerAPI.get("/products", optionalAuth, getAllProducts);
 // Fuzzy search via Elasticsearch (place BEFORE /products/:id to avoid route conflicts)
-routerAPI.get('/products/search', async (req, res) => {
+routerAPI.get('/products/search', optionalAuth, async (req, res) => {
     try {
         const { 
             q = '', 
@@ -89,7 +90,7 @@ routerAPI.get('/products/search', async (req, res) => {
 });
 
 // Category filter
-routerAPI.get("/products/category/:categoryId", getProductsByCategory);
+routerAPI.get("/products/category/:categoryId", optionalAuth, getProductsByCategory);
 // Product detail and interactions (specific sub-routes first)
 routerAPI.post('/products/:id/view', postView);
 routerAPI.post('/products/:id/favorite', auth, postToggleFavorite);

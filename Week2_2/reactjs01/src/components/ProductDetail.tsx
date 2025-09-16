@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useContext } from 'react';
-import { AuthContext } from './context/auth.context.jsx';
 import { useCart } from './context/cart.context';
 import type { Product } from '../types/product';
-import { getProductDetailApi, postProductViewApi, toggleFavoriteApi } from '../util/api';
+import { getProductDetailApi, postProductViewApi } from '../util/api';
 import '../styles/product-components.css';
 
 interface ProductDetailProps {
@@ -15,10 +13,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onProductLoad 
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
-    const [favoriteLoading, setFavoriteLoading] = useState<boolean>(false);
-    const [isFavorited, setIsFavorited] = useState<boolean>(false);
     
-    const { auth } = useContext(AuthContext);
     const { addItem } = useCart();
 
     const handleAddToCart = () => {
@@ -42,9 +37,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onProductLoad 
                 const response = await getProductDetailApi(productId);
                 
                 if (response.success) {
-                    setProduct(response.data);
+                    // backend may include `isFavorited` on the payload now
+                    const payload = response.data as Product & { isFavorited?: boolean; favoritedCount?: number };
+                    setProduct(payload);
+                    // detail view no longer needs isFavorited; product may still include it
                     if (onProductLoad) {
-                        onProductLoad(response.data);
+                        onProductLoad(payload);
                     }
                 } else {
                     setError('Không thể tải thông tin sản phẩm');
@@ -83,42 +81,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onProductLoad 
         }
     };
 
-    const handleToggleFavorite = async () => {
-        if (!auth.isAuthenticated) {
-            alert('Vui lòng đăng nhập để thêm vào yêu thích');
-            return;
-        }
-
-        try {
-            setFavoriteLoading(true);
-            const response = await toggleFavoriteApi(productId);
-            
-            if (response.success) {
-                setIsFavorited(response.data.favorited);
-                // Update favorite count in product
-                if (product) {
-                    const newCount = response.data.favorited 
-                        ? (product.favoritedCount || 0) + 1
-                        : Math.max((product.favoritedCount || 0) - 1, 0);
-                    
-                    setProduct({
-                        ...product,
-                        favoritedCount: newCount
-                    });
-                }
-            }
-        } catch (err: unknown) {
-            console.error('Error toggling favorite:', err);
-            const errorMessage = err && typeof err === 'object' && 'response' in err && 
-                err.response && typeof err.response === 'object' && 'data' in err.response &&
-                err.response.data && typeof err.response.data === 'object' && 'message' in err.response.data
-                ? (err.response.data as { message: string }).message 
-                : 'Có lỗi xảy ra';
-            alert(errorMessage);
-        } finally {
-            setFavoriteLoading(false);
-        }
-    };
+    // favorite button removed in detail view; toggling handled from product list/card
 
     if (loading) {
         return (
@@ -165,17 +128,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onProductLoad 
                 <div className="product-info-section">
                     <div className="product-header">
                         <h1 className="product-title">{product.name}</h1>
-                        <button 
-                            onClick={handleToggleFavorite}
-                            disabled={favoriteLoading}
-                            className={`favorite-button ${isFavorited ? 'favorited' : ''} ${favoriteLoading ? 'loading' : ''}`}
-                            title={isFavorited ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
-                        >
-                            <span className="heart-icon">
-                                {isFavorited ? '❤️' : '🤍'}
-                            </span>
-                            {favoriteLoading && <span className="loading-text">...</span>}
-                        </button>
+                        {/* favorite removed from detail view; toggling available from product cards */}
                     </div>
 
                     <div className="product-stats">
@@ -221,14 +174,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onProductLoad 
                                 </span>
                             </div>
                             
-                            {product.rating && (
+                            {product.rating != null && (
                                 <div className="rating-section">
                                     <span className="rating">⭐ {product.rating.toFixed(1)}</span>
                                 </div>
                             )}
                             
                             <div className="category-section">
-                                <span className="category">Danh mục: {product.category.name}</span>
+                          <span className="category">Danh mục: {product.category?.name ?? '—'}</span>
                             </div>
                         </div>
                     </div>
